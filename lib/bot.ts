@@ -132,28 +132,13 @@ export function createBot(): Bot<BotContext> {
     notifyAdmin(TEXTS.adminConsultRequest.replace("{username}", username.replace("@", "")));
 
     ctx.session.step = "awaiting_scheduling";
-    await ctx.reply(TEXTS.consultYesReply, { parse_mode: undefined });
 
-    const videoNoteId = process.env.VIDEO_NOTE_ID;
-    if (videoNoteId) {
-      try {
-        await ctx.replyWithVideoNote(videoNoteId);
-      } catch {
-        // skip if file_id invalid
-      }
-    }
-
-    const casesKb = new InlineKeyboard().url(
-      TEXTS.casesButton,
-      TEXTS.casesUrl
-    );
-    await ctx.reply(TEXTS.scheduleCta, { reply_markup: casesKb });
-
+    // Keep funnel clean: no "about me" and no cases, only scheduling button.
     const scheduleKb = new InlineKeyboard().text(
       TEXTS.scheduleButton,
       "schedule_input"
     );
-    await ctx.reply(TEXTS.schedulePrompt, { reply_markup: scheduleKb });
+    await ctx.reply(TEXTS.scheduleCta, { reply_markup: scheduleKb });
   });
 
   // ——— Callback: schedule_input (prompt to type) ———
@@ -168,11 +153,19 @@ export function createBot(): Bot<BotContext> {
     ctx.session.step = "idle";
     ctx.session.currentQuestionIndex = 0;
     ctx.session.answers = [];
-    const channelKb = new InlineKeyboard().url(
-      TEXTS.channelButton,
-      TEXTS.channelUrl
+    await ctx.reply(TEXTS.consultNoBiography);
+    const casesKb = new InlineKeyboard().url(
+      TEXTS.consultNoCasesButton,
+      TEXTS.consultNoCasesUrl
     );
-    await ctx.reply(TEXTS.consultNoReply, { reply_markup: channelKb });
+    await ctx.reply("👇", { reply_markup: casesKb });
+    const socialKb = new InlineKeyboard()
+      .url(TEXTS.consultNoSocialVkButton, TEXTS.consultNoVkUrl)
+      .row()
+      .url(TEXTS.consultNoSocialTgButton, TEXTS.consultNoTgSocialUrl)
+      .row()
+      .url(TEXTS.consultNoSocialMaxButton, TEXTS.consultNoMaxUrl);
+    await ctx.reply(TEXTS.consultNoSocialsIntro, { reply_markup: socialKb });
   });
 
   // ——— Text in awaiting_scheduling: forward to admin, confirm, reset ———

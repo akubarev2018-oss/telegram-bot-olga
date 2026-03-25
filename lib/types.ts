@@ -9,7 +9,7 @@ export type SessionStep =
 
 export interface SessionData {
   step: SessionStep;
-  currentQuestionIndex: number; // 0..9
+  currentQuestionIndex: number; // 0..7
   answers: number[]; // scores 1-10
   userInfo?: {
     username?: string;
@@ -23,4 +23,4 @@ export const DEFAULT_SESSION: SessionData = {
   answers: [],
 };
 
-export const TOTAL_QUESTIONS = 10;
+export const TOTAL_QUESTIONS = 8;
